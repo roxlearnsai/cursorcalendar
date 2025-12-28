@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { IsoDate, PhotoByDate } from "./types";
-import { MAX_YEAR, MIN_YEAR, initialYearMonth, monthLabel, shiftYearMonth, type SupportedYear } from "./lib/dates";
+import { initialYearMonth, monthLabel, type SupportedYear } from "./lib/dates";
 import { loadSingaporeHolidays } from "./lib/holidays";
 import { loadPhotos, savePhotos } from "./lib/storage";
 import { CalendarGrid } from "./components/CalendarGrid";
@@ -46,33 +46,10 @@ export function App() {
 
   const monthTitle = useMemo(() => `${monthLabel(year, monthIndex)} ${year}`, [year, monthIndex]);
 
-  const atMin = year === MIN_YEAR && monthIndex === 0;
-  const atMax = year === MAX_YEAR && monthIndex === 11;
-
   return (
     <div className="appShell">
       <header className="topBar">
-        <div className="brand">
-          <div className="brandTitle">Singapore Calendar</div>
-          <div className="brandSubtitle">2025–2026 · Monthly view · Photos per day</div>
-        </div>
-
         <div className="controls">
-          <button
-            className="button"
-            type="button"
-            onClick={() => {
-              const next = shiftYearMonth({ year, monthIndex }, -1);
-              setYear(next.year);
-              setMonthIndex(next.monthIndex);
-            }}
-            aria-label="Previous month"
-            title="Previous month"
-            disabled={atMin}
-          >
-            ←
-          </button>
-
           <YearPicker
             year={year}
             onChangeYear={(y) => {
@@ -81,34 +58,12 @@ export function App() {
           />
 
           <MonthPicker year={year} monthIndex={monthIndex} onChangeMonthIndex={setMonthIndex} />
-
-          <button
-            className="button"
-            type="button"
-            onClick={() => {
-              const next = shiftYearMonth({ year, monthIndex }, 1);
-              setYear(next.year);
-              setMonthIndex(next.monthIndex);
-            }}
-            aria-label="Next month"
-            title="Next month"
-            disabled={atMax}
-          >
-            →
-          </button>
         </div>
       </header>
 
       <main className="content">
-        <div className="metaRow">
-          <div className="monthHeading">{monthTitle}</div>
-          <div className="status">
-            {holidayStatus === "loading" ? (
-              <span className="statusPill">Loading SG public holidays…</span>
-            ) : (
-              <span className="statusPill statusOk">SG public holidays loaded</span>
-            )}
-          </div>
+        <div className="monthTitleSrOnly" aria-hidden>
+          {monthTitle}
         </div>
 
         <CalendarGrid
@@ -136,21 +91,7 @@ export function App() {
             });
           }}
         />
-
-        <section className="tips">
-          <div className="tipsTitle">Tips</div>
-          <ul className="tipsList">
-            <li>
-              Photos are stored in your browser (localStorage). Use smaller images if you hit storage limits.
-            </li>
-            <li>Click any photo thumbnail to remove it.</li>
-          </ul>
-        </section>
       </main>
-
-      <footer className="footer">
-        <span>2025–2026 · Week starts Monday · Default SG public holidays</span>
-      </footer>
     </div>
   );
 }
