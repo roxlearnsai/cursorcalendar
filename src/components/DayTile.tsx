@@ -1,3 +1,4 @@
+import React from "react";
 import { format } from "date-fns";
 import type { DayPhoto, IsoDate } from "../types";
 
@@ -31,86 +32,79 @@ export function DayTile(props: {
   iso: IsoDate;
   date: Date;
   inMonth: boolean;
+  isWeekend: boolean;
   holidayNames: string[] | undefined;
   photos: DayPhoto[] | undefined;
   onAddPhotos: (iso: IsoDate, photos: DayPhoto[]) => void;
   onRemovePhoto: (iso: IsoDate, photoId: string) => void;
 }) {
-  const { iso, date, inMonth, holidayNames, photos, onAddPhotos, onRemovePhoto } = props;
+  const { iso, date, inMonth, isWeekend, holidayNames, photos, onAddPhotos, onRemovePhoto } = props;
   const dayNumber = format(date, "d");
   const photoCount = photos?.length ?? 0;
   const canAddMore = inMonth && photoCount < 4;
+  const holidayText = holidayNames?.[0];
 
   return (
-    <div className={`dayTile ${inMonth ? "" : "dayTileMuted"}`}>
-      <div className="dayTileHeader">
-        <div className="dayNumber" title={iso}>
-          {dayNumber}
+    <div
+      className={`dayTile ${inMonth ? "" : "dayTileMuted"} ${isWeekend ? "dayTileWeekend" : ""}`}
+      title={iso}
+    >
+      {holidayText ? (
+        <div className="holidayText" title={holidayNames?.join(", ")}>
+          {holidayText}
         </div>
-        {canAddMore ? (
-          <label className="addPhotosButton" title="Add photos (max 4)">
-            <span aria-hidden>＋</span>
-            <span className="srOnly">Add photos</span>
-            <input
-              className="fileInput"
-              type="file"
-              accept="image/*"
-              multiple
-              onChange={async (e) => {
-                const fileList = e.currentTarget.files;
-                if (!fileList) return;
-                const remaining = 4 - (photos?.length ?? 0);
-                const toTake = Array.from(fileList).slice(0, remaining);
-                // reset input so selecting same file again works
-                e.currentTarget.value = "";
-                if (toTake.length === 0) return;
-                const nextPhotos = await filesToDataUrls(toTake);
-                onAddPhotos(iso, nextPhotos);
-              }}
-            />
-          </label>
-        ) : (
-          <div className="addPhotosButtonDisabled" title={inMonth ? "Max 4 photos" : ""}>
-            <span aria-hidden>＋</span>
-          </div>
-        )}
-      </div>
+      ) : null}
 
-      {holidayNames && holidayNames.length > 0 ? (
-        <div className="holidayList">
-          {holidayNames.slice(0, 2).map((name) => (
-            <div className="holidayPill" key={name} title={name}>
-              {name}
-            </div>
-          ))}
-          {holidayNames.length > 2 ? (
-            <div className="holidayMore" title={holidayNames.join(", ")}>
-              +{holidayNames.length - 2} more
-            </div>
-          ) : null}
-        </div>
-      ) : (
-        <div className="holidaySpacer" />
-      )}
+      {canAddMore ? (
+        <label className="addPhotosCorner" title="Add photos (max 4)">
+          <span className="addPhotosPlus" aria-hidden>
+            +
+          </span>
+          <span className="srOnly">Add photos</span>
+          <input
+            className="fileInput"
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={async (e) => {
+              const fileList = e.currentTarget.files;
+              if (!fileList) return;
+              const remaining = 4 - (photos?.length ?? 0);
+              const toTake = Array.from(fileList).slice(0, remaining);
+              // reset input so selecting same file again works
+              e.currentTarget.value = "";
+              if (toTake.length === 0) return;
+              const nextPhotos = await filesToDataUrls(toTake);
+              onAddPhotos(iso, nextPhotos);
+            }}
+          />
+        </label>
+      ) : null}
+
+      <div className={`dayNumber ${inMonth ? "dayNumberInMonth" : "dayNumberOutMonth"}`}>{dayNumber}</div>
 
       {photos && photos.length > 0 ? (
-        <div className="photoGrid">
-          {photos.slice(0, 4).map((p) => (
+        <div className="photoStack">
+          {photos.slice(0, 4).map((p, idx) => (
             <button
               key={p.id}
-              className="photoThumb"
+              className="photoCard"
               type="button"
               title="Remove photo"
               onClick={() => onRemovePhoto(iso, p.id)}
+              style={
+                {
+                  ["--dx" as any]: `${idx * 10}px`,
+                  ["--dy" as any]: `${idx * 4}px`,
+                  ["--rot" as any]: `${idx === 0 ? -4 : idx === 1 ? 3 : idx === 2 ? -2 : 2}deg`
+                } as React.CSSProperties
+              }
             >
               <img src={p.dataUrl} alt={p.fileName} />
-              <span className="photoRemove">Remove</span>
             </button>
           ))}
         </div>
-      ) : (
-        <div className="photoEmpty">{inMonth ? "No photos" : ""}</div>
-      )}
+      ) : null}
     </div>
   );
 }
