@@ -1,10 +1,11 @@
-import { APP_YEAR, monthLabel } from "../lib/dates";
+import { monthLabel } from "../lib/dates";
 
 export function MonthPicker(props: {
+  year: number;
   monthIndex: number;
   onChangeMonthIndex: (next: number) => void;
 }) {
-  const { monthIndex, onChangeMonthIndex } = props;
+  const { year, monthIndex, onChangeMonthIndex } = props;
 
   return (
     <div className="monthPicker">
@@ -17,7 +18,7 @@ export function MonthPicker(props: {
         >
           {Array.from({ length: 12 }).map((_, i) => (
             <option value={i} key={i}>
-              {monthLabel(i)} {APP_YEAR}
+              {monthLabel(year, i)} {year}
             </option>
           ))}
         </select>

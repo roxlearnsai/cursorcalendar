@@ -28,6 +28,20 @@ function toMap(holidays: Holiday[]): Record<IsoDate, string[]> {
 
 // Fallback list (used only if network/API fails).
 // Source: common SG public holiday set; dates are best-effort.
+const FALLBACK_2025: Holiday[] = [
+  { date: "2025-01-01", name: "New Year's Day" },
+  { date: "2025-01-29", name: "Chinese New Year" },
+  { date: "2025-01-30", name: "Chinese New Year (2nd day)" },
+  { date: "2025-03-31", name: "Hari Raya Puasa" },
+  { date: "2025-04-18", name: "Good Friday" },
+  { date: "2025-05-01", name: "Labour Day" },
+  { date: "2025-05-12", name: "Vesak Day" },
+  { date: "2025-06-07", name: "Hari Raya Haji" },
+  { date: "2025-08-09", name: "National Day" },
+  { date: "2025-10-20", name: "Deepavali" },
+  { date: "2025-12-25", name: "Christmas Day" }
+];
+
 const FALLBACK_2026: Holiday[] = [
   { date: "2026-01-01", name: "New Year's Day" },
   { date: "2026-02-17", name: "Chinese New Year" },
@@ -42,10 +56,15 @@ const FALLBACK_2026: Holiday[] = [
   { date: "2026-12-25", name: "Christmas Day" }
 ];
 
-export async function loadSingaporeHolidays2026(): Promise<Record<IsoDate, string[]>> {
+function fallbackForYear(year: number): Holiday[] {
+  if (year === 2025) return FALLBACK_2025;
+  return FALLBACK_2026;
+}
+
+export async function loadSingaporeHolidays(year: number): Promise<Record<IsoDate, string[]>> {
   // Nager.Date API (no key, CORS enabled). If it fails, fall back to bundled list.
   try {
-    const res = await fetch("https://date.nager.at/api/v3/PublicHolidays/2026/SG", {
+    const res = await fetch(`https://date.nager.at/api/v3/PublicHolidays/${year}/SG`, {
       method: "GET",
       headers: { Accept: "application/json" }
     });
@@ -59,7 +78,7 @@ export async function loadSingaporeHolidays2026(): Promise<Record<IsoDate, strin
     }
     return toMap(holidays);
   } catch {
-    return toMap(FALLBACK_2026);
+    return toMap(fallbackForYear(year));
   }
 }
 
