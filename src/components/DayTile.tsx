@@ -1,3 +1,4 @@
+import React from "react";
 import { format } from "date-fns";
 import type { DayPhoto, IsoDate } from "../types";
 
@@ -91,7 +92,13 @@ export function DayTile(props: {
               type="button"
               title="Remove photo"
               onClick={() => onRemovePhoto(iso, p.id)}
-              style={{ transform: `translate(${idx * 10}px, ${idx * 4}px)` }}
+              style={
+                {
+                  ["--dx" as any]: `${idx * 10}px`,
+                  ["--dy" as any]: `${idx * 4}px`,
+                  ["--rot" as any]: `${idx === 0 ? -4 : idx === 1 ? 3 : idx === 2 ? -2 : 2}deg`
+                } as React.CSSProperties
+              }
             >
               <img src={p.dataUrl} alt={p.fileName} />
             </button>

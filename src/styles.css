@@ -80,9 +80,10 @@ body {
 }
 
 .weekdayCell {
+  position: relative;
   border-right: 1px solid var(--border);
   border-bottom: 1px solid var(--border);
-  padding: 10px 8px;
+  padding: 10px 8px 12px;
   text-align: center;
   font-weight: 800;
 }
@@ -92,13 +93,27 @@ body {
 }
 
 .weekdayIcon {
+  position: absolute;
+  top: 8px;
+  left: 8px;
   font-size: 20px;
-  margin-bottom: 4px;
 }
 
 .weekdayLine {
-  font-size: 22px;
   line-height: 1.1;
+}
+
+.weekdayLine1 {
+  font-size: 22px;
+}
+.weekdayLine2 {
+  font-size: 20px;
+}
+.weekdayLine3 {
+  font-size: 22px;
+}
+.weekdayLine4 {
+  font-size: 22px;
 }
 
 .grid {
@@ -181,7 +196,7 @@ body {
 }
 
 .dayNumberOutMonth {
-  top: 56px;
+  bottom: 8px;
   right: 10px;
   font-size: 20px;
   color: #c8c8c8;
@@ -208,6 +223,8 @@ body {
   background: #ffffff;
   overflow: hidden;
   cursor: pointer;
+  transform: translate(var(--dx, 0), var(--dy, 0)) rotate(var(--rot, 0deg));
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.15);
 }
 
 .photoCard img {

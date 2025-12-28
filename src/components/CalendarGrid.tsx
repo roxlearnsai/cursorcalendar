@@ -66,8 +66,8 @@ export function CalendarGrid(props: {
             <div className="weekdayIcon" aria-hidden>
               {w.icon}
             </div>
-            {w.lines.map((line) => (
-              <div className="weekdayLine" key={line}>
+            {w.lines.map((line, idx) => (
+              <div className={`weekdayLine weekdayLine${idx + 1}`} key={line}>
                 {line}
               </div>
             ))}
