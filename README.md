@@ -1,6 +1,6 @@
-# Singapore 2026 Calendar (Monthly) + Photos per Day
+# Singapore 2025–2026 Calendar (Monthly) + Photos per Day
 
-A lightweight web app that shows a **monthly 2026 calendar**, preloads **Singapore public holidays**, and lets you **attach up to 4 photos per day tile** (stored locally in your browser).
+A lightweight web app that shows a **monthly 2025–2026 calendar**, preloads **Singapore public holidays**, and lets you **attach up to 4 photos per day tile** (stored locally in your browser).
 
 ## Run locally
 
@@ -13,7 +13,7 @@ Then open the URL printed by Vite (usually `http://localhost:5173`).
 
 ## Features
 
-- **Monthly view for 2026** (week starts Monday)
+- **Monthly view for 2025–2026** (week starts Monday)
 - **Default Singapore public holidays**
   - Loads from the public `date.nager.at` API when available
   - Falls back to a bundled list if offline

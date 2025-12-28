@@ -1,15 +1,19 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { IsoDate, PhotoByDate } from "./types";
-import { APP_YEAR, monthIndexAfter, monthIndexFromDate, monthLabel } from "./lib/dates";
-import { loadSingaporeHolidays2026 } from "./lib/holidays";
+import { MAX_YEAR, MIN_YEAR, initialYearMonth, monthLabel, shiftYearMonth, type SupportedYear } from "./lib/dates";
+import { loadSingaporeHolidays } from "./lib/holidays";
 import { loadPhotos, savePhotos } from "./lib/storage";
 import { CalendarGrid } from "./components/CalendarGrid";
 import { MonthPicker } from "./components/MonthPicker";
+import { YearPicker } from "./components/YearPicker";
 
 export function App() {
-  const [monthIndex, setMonthIndex] = useState<number>(() => monthIndexFromDate(new Date()));
+  const initial = initialYearMonth(new Date());
+  const [year, setYear] = useState<SupportedYear>(initial.year);
+  const [monthIndex, setMonthIndex] = useState<number>(initial.monthIndex);
   const [holidaysByDate, setHolidaysByDate] = useState<Record<string, string[]>>({});
   const [holidayStatus, setHolidayStatus] = useState<"loading" | "ready">("loading");
+  const holidayCacheRef = useRef<Record<number, Record<string, string[]>>>({});
 
   const [photosByDate, setPhotosByDate] = useState<PhotoByDate>(() => {
     try {
@@ -28,47 +32,67 @@ export function App() {
     let cancelled = false;
     (async () => {
       setHolidayStatus("loading");
-      const map = await loadSingaporeHolidays2026();
+      const cached = holidayCacheRef.current[year];
+      const map = cached ?? (await loadSingaporeHolidays(year));
       if (cancelled) return;
+      holidayCacheRef.current[year] = map;
       setHolidaysByDate(map);
       setHolidayStatus("ready");
     })();
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [year]);
 
-  const monthTitle = useMemo(() => `${monthLabel(monthIndex)} ${APP_YEAR}`, [monthIndex]);
+  const monthTitle = useMemo(() => `${monthLabel(year, monthIndex)} ${year}`, [year, monthIndex]);
+
+  const atMin = year === MIN_YEAR && monthIndex === 0;
+  const atMax = year === MAX_YEAR && monthIndex === 11;
 
   return (
     <div className="appShell">
       <header className="topBar">
         <div className="brand">
           <div className="brandTitle">Singapore Calendar</div>
-          <div className="brandSubtitle">2026 · Monthly view · Photos per day</div>
+          <div className="brandSubtitle">2025–2026 · Monthly view · Photos per day</div>
         </div>
 
         <div className="controls">
           <button
             className="button"
             type="button"
-            onClick={() => setMonthIndex((m) => monthIndexAfter(m, -1))}
+            onClick={() => {
+              const next = shiftYearMonth({ year, monthIndex }, -1);
+              setYear(next.year);
+              setMonthIndex(next.monthIndex);
+            }}
             aria-label="Previous month"
             title="Previous month"
-            disabled={monthIndex === 0}
+            disabled={atMin}
           >
             ←
           </button>
 
-          <MonthPicker monthIndex={monthIndex} onChangeMonthIndex={setMonthIndex} />
+          <YearPicker
+            year={year}
+            onChangeYear={(y) => {
+              setYear(y as SupportedYear);
+            }}
+          />
+
+          <MonthPicker year={year} monthIndex={monthIndex} onChangeMonthIndex={setMonthIndex} />
 
           <button
             className="button"
             type="button"
-            onClick={() => setMonthIndex((m) => monthIndexAfter(m, 1))}
+            onClick={() => {
+              const next = shiftYearMonth({ year, monthIndex }, 1);
+              setYear(next.year);
+              setMonthIndex(next.monthIndex);
+            }}
             aria-label="Next month"
             title="Next month"
-            disabled={monthIndex === 11}
+            disabled={atMax}
           >
             →
           </button>
@@ -88,6 +112,7 @@ export function App() {
         </div>
 
         <CalendarGrid
+          year={year}
           monthIndex={monthIndex}
           holidaysByDate={holidaysByDate}
           photosByDate={photosByDate}
@@ -124,7 +149,7 @@ export function App() {
       </main>
 
       <footer className="footer">
-        <span>2026 only · Week starts Monday · Default SG public holidays</span>
+        <span>2025–2026 · Week starts Monday · Default SG public holidays</span>
       </footer>
     </div>
   );

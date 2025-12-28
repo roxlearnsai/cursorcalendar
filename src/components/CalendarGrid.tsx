@@ -5,14 +5,15 @@ import { DayTile } from "./DayTile";
 const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] as const;
 
 export function CalendarGrid(props: {
+  year: number;
   monthIndex: number;
   holidaysByDate: Record<string, string[]>;
   photosByDate: PhotoByDate;
   onAddPhotos: (iso: IsoDate, photos: PhotoByDate[IsoDate]) => void;
   onRemovePhoto: (iso: IsoDate, photoId: string) => void;
 }) {
-  const { monthIndex, holidaysByDate, photosByDate, onAddPhotos, onRemovePhoto } = props;
-  const cells = buildMonthGrid(monthIndex);
+  const { year, monthIndex, holidaysByDate, photosByDate, onAddPhotos, onRemovePhoto } = props;
+  const cells = buildMonthGrid(year, monthIndex);
 
   return (
     <div className="calendar">
